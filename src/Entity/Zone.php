@@ -44,6 +44,12 @@ class Zone
      */
     private $places;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Office::class, inversedBy="zones")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $office;
+
     public function __construct()
     {
         $this->places = new ArrayCollection();
@@ -128,6 +134,18 @@ class Zone
                 $place->setZone(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOffice(): ?Office
+    {
+        return $this->office;
+    }
+
+    public function setOffice(?Office $office): self
+    {
+        $this->office = $office;
 
         return $this;
     }
