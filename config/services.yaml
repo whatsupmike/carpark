@@ -35,4 +35,4 @@ services:
 
     App\Service\ResponseFactory:
         arguments:
-            $commandName: "%env(COMMAND_NAME)%"
+            $commandName: "test"
