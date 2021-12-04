@@ -41,4 +41,19 @@ class PlaceReservationRepository extends ServiceEntityRepository
 
         return array_values(array_map(fn(PlaceReservation $reservation) => $reservation->getPlace(), $results));
     }
+
+    public function findReservationForPlaceAndDateRange(Place $place, \DateTime $dateFrom, \DateTime $dateTo)
+    {
+        return $this->createQueryBuilder('pr')
+            ->where('pr.place = :place')
+            ->andWhere('pr.date >= :dateFrom')
+            ->andWhere('pr.date <= :dateTo')
+            ->setParameters([
+                'place' => $place,
+                'dateFrom' => $dateFrom,
+                'dateTo' => $dateTo
+            ])
+            ->getQuery()
+            ->getResult();
+    }
 }

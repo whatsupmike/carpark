@@ -91,7 +91,7 @@ class OfficeController extends AbstractController
     #[Route(path: '/employee', methods: [Request::METHOD_GET])]
     public function employee(EntityManagerInterface $em): Response
     {
-        $em->persist((new StsEmployee())->setEmail('michal.bialas-drzewiecki@sts.pl'));
+        $em->persist((new StsEmployee())->setEmail('patryk.kozlowski@sts.pl'));
         $em->flush();
 
         return new Response('ok');
@@ -100,8 +100,8 @@ class OfficeController extends AbstractController
     #[Route(path: '/employee-place', methods: [Request::METHOD_GET])]
     public function employeePlace(EntityManagerInterface $em): Response
     {
-        $place = $this->placeRepository->find(13);
-        $employee = $this->employeeRepository->find(1);
+        $place = $this->placeRepository->find(4);
+        $employee = $this->employeeRepository->find(2);
         $em->persist((new EmployeePlace())->setPlace($place)->setEmployee($employee));
         $em->flush();
 

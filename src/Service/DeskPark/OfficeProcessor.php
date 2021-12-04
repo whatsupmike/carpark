@@ -52,9 +52,12 @@ class OfficeProcessor
 
         for($i = 0;$i < self::DAYS_COUNT; $i++) {
             $dateFormatted = $date->format('Y-m-d');
-            $grids[$dateFormatted]['date'] = $dateFormatted;
-            $grids[$dateFormatted]['day_name'] = DaysDictionary::getLocalizedDayName((int) $date->format('w'));
-            $grids[$dateFormatted]['map'] = $this->getGridForDateAndUser($zone, $user, $date);
+            $grids[] = [
+                'date' => $dateFormatted,
+                'day_name' => DaysDictionary::getLocalizedDayName((int) $date->format('w')),
+                'map' => $this->getGridForDateAndUser($zone, $user, $date),
+            ];
+
             $date->modify('+1 day');
         }
 
@@ -92,6 +95,10 @@ class OfficeProcessor
 
         $freePlacesReservation = $this->placeReservationRepository->findFreePlaces($zone, $dateTime);
 
-        return array_values($places + $freePlacesReservation);
+        foreach ($freePlacesReservation as $freePlace){
+            $places[] = $freePlace;
+        }
+
+        return array_values($places);
     }
 }
