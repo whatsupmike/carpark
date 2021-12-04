@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\PlaceRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -32,6 +33,16 @@ class Place
      * @ORM\Column(type="integer")
      */
     private $yCoordinate;
+
+    /**
+     * @ORM\OneToMany(targetEntity=EmployeePlace::class, mappedBy="place")
+     */
+    private $employeePlaces;
+
+    public function __construct()
+    {
+        $this->employeePlaces = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {

@@ -32,4 +32,15 @@ class GridTileDictionary
             self::DESK_RIGHT_FREE,
         ];
     }
+
+    static function setDeskFree(int $desk): int
+    {
+        return match($desk){
+            self::DESK_TOP_OCCUPIED => self::DESK_TOP_FREE,
+            self::DESK_BOTTOM_OCCUPIED => self::DESK_BOTTOM_FREE,
+            self::DESK_LEFT_OCCUPIED => self::DESK_LEFT_FREE,
+            self::DESK_RIGHT_OCCUPIED => self::DESK_RIGHT_FREE,
+            default => $desk
+        };
+    }
 }

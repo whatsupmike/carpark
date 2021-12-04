@@ -4,10 +4,15 @@ declare(strict_types=1);
 
 namespace App\Service\DeskPark;
 
+use App\Dictionary\DaysDictionary;
+use App\Dictionary\GridTileDictionary;
+use App\Entity\EmployeePlace;
 use App\Entity\Office;
+use App\Entity\Place;
 use App\Entity\StsEmployee;
 use App\Entity\Zone;
 use App\Repository\EmployeePlaceRepository;
+use App\Repository\PlaceRepository;
 use App\Repository\PlaceReservationRepository;
 
 class OfficeProcessor
@@ -16,7 +21,8 @@ class OfficeProcessor
 
     public function __construct(
         private EmployeePlaceRepository    $employeePlaceRepository,
-        private PlaceReservationRepository $placeReservationRepository
+        private PlaceReservationRepository $placeReservationRepository,
+        private PlaceRepository $placeRepository
     ) {
     }
 
@@ -30,8 +36,9 @@ class OfficeProcessor
         foreach ($office->getZones() as $zone) {
             $result['zones'][] = [
                 'id' => $zone->getId(),
+                'name' => $zone->getName(),
                 'columns_count' => $zone->getColumnsCount(),
-                'map' => $zone->getGrid()
+                'map' => $this->processGrid($zone, $user)
             ];
         }
 
@@ -44,7 +51,10 @@ class OfficeProcessor
         $date = (new \DateTime())->setTime(0, 0, 0);
 
         for($i = 0;$i < self::DAYS_COUNT; $i++) {
-            $grids[$date->format('Y-m-d')] = $this->getGridForDateAndUser($zone, $user, $date);
+            $dateFormatted = $date->format('Y-m-d');
+            $grids[$dateFormatted]['date'] = $dateFormatted;
+            $grids[$dateFormatted]['day_name'] = DaysDictionary::getLocalizedDayName((int) $date->format('w'));
+            $grids[$dateFormatted]['map'] = $this->getGridForDateAndUser($zone, $user, $date);
             $date->modify('+1 day');
         }
 
@@ -53,17 +63,35 @@ class OfficeProcessor
 
     private function getGridForDateAndUser(Zone $zone, StsEmployee $user, \DateTime $date): array
     {
-        $freePlaces =
-        $grid = [];
-        foreach ($zone->getPlaces() as $place) {
-//            $place->
+        $freePlaces = $this->getFreePlaces($zone, $date);
+        $grid = $zone->getGrid();
+        foreach ($freePlaces as $place) {
+            $xCoordinate = $place->getXCoordinate();
+            $grid[$xCoordinate] = GridTileDictionary::setDeskFree($grid[$xCoordinate]);
         }
 
         return $grid;
     }
 
-    private function getFreePlaces(): array
+    /**
+     * @return Place[]
+     */
+    private function getFreePlaces(Zone $zone, \DateTime $dateTime): array
     {
+        $places = $this->placeRepository->findPlaces($zone);
+        $placesOccupied = array_map(fn(EmployeePlace $ep)=> $ep->getPlace(), $this->employeePlaceRepository->findAllForZone($zone));
 
+        foreach ($placesOccupied as $placeOccupied){
+            foreach ($places as $key => $place) {
+                if ($place->getId() === $placeOccupied->getId()) {
+                    unset($places[$key]);
+                    break;
+                }
+            }
+        }
+
+        $freePlacesReservation = $this->placeReservationRepository->findFreePlaces($zone, $dateTime);
+
+        return array_values($places + $freePlacesReservation);
     }
 }

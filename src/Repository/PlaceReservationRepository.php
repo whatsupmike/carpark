@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Place;
 use App\Entity\PlaceReservation;
+use App\Entity\Zone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,32 +21,24 @@ class PlaceReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, PlaceReservation::class);
     }
 
-    // /**
-    //  * @return PlaceReservation[] Returns an array of PlaceReservation objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findFreePlaces(Zone $zone, \DateTime $dateTime)
     {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
+        $results = $this->createQueryBuilder('pr')
+            ->where('pr.place IN (:places)')
+            ->andWhere('pr.employee IS NULL')
+            ->setParameter('places', array_map(fn(Place $place) => $place->getId(), $zone->getPlaces()->toArray() ))
             ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+            ->getResult();
 
-    /*
-    public function findOneBySomeField($value): ?PlaceReservation
-    {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        /**
+         * @var $result PlaceReservation
+         */
+        foreach ($results as $key => $result) {
+            if ($result->getDate()->format('Y-m-d') !== $dateTime->format('Y-m-d')){
+                unset($results[$key]);
+            }
+        }
+
+        return array_values(array_map(fn(PlaceReservation $reservation) => $reservation->getPlace(), $results));
     }
-    */
 }
