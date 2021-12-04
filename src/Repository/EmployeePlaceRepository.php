@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\EmployeePlace;
+use App\Entity\Zone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,32 +20,13 @@ class EmployeePlaceRepository extends ServiceEntityRepository
         parent::__construct($registry, EmployeePlace::class);
     }
 
-    // /**
-    //  * @return EmployeePlace[] Returns an array of EmployeePlace objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findAllForZone(Zone $zone)
     {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('e.id', 'ASC')
-            ->setMaxResults(10)
+        return $this->createQueryBuilder('ep')
+            ->join('ep.place', 'place')
+            ->where('place.zone=:zone')
+            ->setParameter('zone', $zone)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?EmployeePlace
-    {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

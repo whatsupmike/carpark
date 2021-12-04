@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Place;
+use App\Entity\Zone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,32 +20,18 @@ class PlaceRepository extends ServiceEntityRepository
         parent::__construct($registry, Place::class);
     }
 
-    // /**
-    //  * @return Place[] Returns an array of Place objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findFreePlaces(Zone $zone)
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
+            ->where('p.zone=:zone')
+            ->leftJoin('p.employeePlaces', 'employeePlaces')
+            ->setParameter('zone', $zone)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?Place
+    public function findPlaces(Zone $zone)
     {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        return $this->findBy(['zone'=>$zone]);
     }
-    */
 }
